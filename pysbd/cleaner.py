@@ -96,7 +96,6 @@ class Cleaner(object):
         if any(k in word for k in cr.URL_EMAIL_KEYWORDS):
             return txt
         new_word = Text(word).apply(rule)
-        # Gerulata fix: txt = re.sub(re.escape(word), new_word, txt)
         txt = txt.replace(word, new_word)
         return txt
 
