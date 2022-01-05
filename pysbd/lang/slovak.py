@@ -72,7 +72,8 @@ class Slovak(Common, Standard):
         def process(self):
             if not self.text:
                 return self.text
-            self.text = self.text.replace('\n', '\r')
+            # Gerulata fix: commented out (no fucking way!!! line endings are already normalized!)
+            #self.text = self.text.replace('\n', '\r')
 
             # Here we use language specific ListItemReplacer:
             li = self.lang.ListItemReplacer(self.text)
