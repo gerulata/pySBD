@@ -110,7 +110,9 @@ class ListItemReplacer(object):
         return txt
 
     def scan_lists(self, regex1, regex2, replacement, strip=False):
-        list_array = re.findall(regex1, self.text, re.ASCII)
+        list_array = re.findall(regex1, self.text)
+        # Removes special characters like ''before the cast
+        list_array = list(map(str.strip, list_array))
         list_array = list(map(int, list_array))
         for ind, item in enumerate(list_array):
             # to avoid IndexError
