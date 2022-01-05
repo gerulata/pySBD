@@ -18,25 +18,20 @@ class ListItemReplacer(object):
     ALPHABETICAL_LIST_WITH_PARENS = r'(?<=\()[a-z]+(?=\))|(?<=^)[a-z]+(?=\))|(?<=\A)[a-z]+(?=\))|(?<=\s)[a-z]+(?=\))'
 
     # (pattern, replacement)
-    # Gerulata fix: ♨ to 󿿾 ("\U000ffffe")
-    SubstituteListPeriodRule = Rule('󿿾', '∯')
-    # Gerulata fix: ☝ to 󿿿 ("\U000fffff")
-    ListMarkerRule = Rule('󿿿', '')
+    SubstituteListPeriodRule = Rule('♨', '∯')
+    ListMarkerRule = Rule('☝', '')
 
     # Rubular: http://rubular.com/r/Wv4qLdoPx7
     # https://regex101.com/r/62YBlv/1
-    # Gerulata fix: ♨ to 󿿾 ("\U000ffffe")
-    SpaceBetweenListItemsFirstRule = Rule(r'(?<=\S\S)\s(?=\S\s*\d+󿿾)', "\r")
+    SpaceBetweenListItemsFirstRule = Rule(r'(?<=\S\S)\s(?=\S\s*\d+♨)', "\r")
 
     # Rubular: http://rubular.com/r/AizHXC6HxK
     # https://regex101.com/r/62YBlv/2
-    # Gerulata fix: ♨ to 󿿾 ("\U000ffffe")
-    SpaceBetweenListItemsSecondRule = Rule(r'(?<=\S\S)\s(?=\d{1,2}󿿾)', "\r")
+    SpaceBetweenListItemsSecondRule = Rule(r'(?<=\S\S)\s(?=\d{1,2}♨)', "\r")
 
     # Rubular: http://rubular.com/r/GE5q6yID2j
     # https://regex101.com/r/62YBlv/3
-    # Gerulata fix: ☝ to 󿿿 ("\U000fffff")
-    SpaceBetweenListItemsThirdRule = Rule(r'(?<=\S\S)\s(?=\d{1,2}󿿿)', "\r")
+    SpaceBetweenListItemsThirdRule = Rule(r'(?<=\S\S)\s(?=\d{1,2}☝)', "\r")
 
     NUMBERED_LIST_REGEX_1 = r'\s\d{1,2}(?=\.\s)|^\d{1,2}(?=\.\s)|\s\d{1,2}(?=\.\))|^\d{1,2}(?=\.\))|(?<=\s\-)\d{1,2}(?=\.\s)|(?<=^\-)\d{1,2}(?=\.\s)|(?<=\s\⁃)\d{1,2}(?=\.\s)|(?<=^\⁃)\d{1,2}(?=\.\s)|(?<=s\-)\d{1,2}(?=\.\))|(?<=^\-)\d{1,2}(?=\.\))|(?<=\s\⁃)\d{1,2}(?=\.\))|(?<=^\⁃)\d{1,2}(?=\.\))'
     # 1. abcd
@@ -78,9 +73,8 @@ class ListItemReplacer(object):
         self.text = Text(self.text).apply(self.ListMarkerRule)
 
     def replace_periods_in_numbered_list(self):
-        # Gerulata fix: ♨ to 󿿾 ("\U000ffffe")
         self.scan_lists(self.NUMBERED_LIST_REGEX_1, self.NUMBERED_LIST_REGEX_2,
-                        '󿿾', strip=True)
+                        '♨', strip=True)
 
     def format_numbered_list_with_periods(self):
         self.replace_periods_in_numbered_list()
@@ -116,10 +110,7 @@ class ListItemReplacer(object):
         return txt
 
     def scan_lists(self, regex1, regex2, replacement, strip=False):
-        # Gerulata fix: added flag re.ASCII
-        # \d in unicode regex is not int() compatible it will return not only digits but all sort of nonsense chars (like arabic letters)
-        list_array = re.findall(regex1, self.text, re.ASCII)
-        #list_array = re.findall(regex1, self.text)
+        list_array = re.findall(regex1, self.text)
         list_array = list(map(int, list_array))
         for ind, item in enumerate(list_array):
             # to avoid IndexError
@@ -133,8 +124,8 @@ class ListItemReplacer(object):
                     self.substitute_found_list_items(regex2, item, strip, replacement)
 
     def substitute_found_list_items(self, regex, each, strip, replacement):
-        # Gerulata fix: ♨ to 󿿾 ("\U000ffffe")
-        def replace_item(match, val=None, strip=False, repl='󿿾'):
+
+        def replace_item(match, val=None, strip=False, repl='♨'):
             match = match.group()
             if strip:
                 match = str(match).strip()
@@ -147,24 +138,20 @@ class ListItemReplacer(object):
         self.text = re.sub(regex, partial(replace_item, val=each,
                            strip=strip, repl=replacement), self.text)
 
-    # Gerulata fix: ♨ to 󿿾 ("\U000ffffe")
     def add_line_breaks_for_numbered_list_with_periods(self):
-        if ('󿿾' in self.text) and (not re.search(
-                # Gerulata fix: from (\n|\r) to ([\n\r])
-                r'󿿾.+([\n\r]).+󿿾', self.text)) and (not re.search(
-                    r'for\s\d{1,2}󿿾\s[a-z]', self.text)):
+        if ('♨' in self.text) and (not re.search(
+                '♨.+(\n|\r).+♨', self.text)) and (not re.search(
+                    r'for\s\d{1,2}♨\s[a-z]', self.text)):
             self.text = Text(self.text).apply(self.SpaceBetweenListItemsFirstRule,
                                     self.SpaceBetweenListItemsSecondRule)
 
     def replace_parens_in_numbered_list(self):
-        # Gerulata fix: ☝ to 󿿿 ("\U000fffff")
         self.scan_lists(
-            self.NUMBERED_LIST_PARENS_REGEX, self.NUMBERED_LIST_PARENS_REGEX, '󿿿')
-        self.scan_lists(self.NUMBERED_LIST_PARENS_REGEX, self.NUMBERED_LIST_PARENS_REGEX, '󿿿')
+            self.NUMBERED_LIST_PARENS_REGEX, self.NUMBERED_LIST_PARENS_REGEX, '☝')
+        self.scan_lists(self.NUMBERED_LIST_PARENS_REGEX, self.NUMBERED_LIST_PARENS_REGEX, '☝')
 
-    # Gerulata fix: ☝ to 󿿿 ("\U000fffff")
     def add_line_breaks_for_numbered_list_with_parens(self):
-        if '󿿿' in self.text and not re.search(r"󿿿.+\n.+󿿿|󿿿.+\r.+󿿿", self.text):
+        if '☝' in self.text and not re.search("☝.+\n.+☝|☝.+\r.+☝", self.text):
             self.text = Text(self.text).apply(
                 self.SpaceBetweenListItemsThirdRule)
 
