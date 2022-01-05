@@ -64,7 +64,8 @@ class CleanRules(object):
 
 class HTML(object):
     # Rubular: http://rubular.com/r/9d0OVOEJWj
-    HTMLTagRule = Rule(r"<\/?\w+((\s+\w+(\s*=\s*(?:\".*?\"|'.*?'|[\^'\">\s]+))?)+\s*|\s*)\/?>", '')
+    # Gerulata fix: HTMLTagRule = Rule(r"<\/?\w+((\s+\w+(\s*=\s*(?:\".*?\"|'.*?'|[\^'\">\s]+))?)+\s*|\s*)\/?>", '')
+    HTMLTagRule = Rule(r"(<([^>]+)>)", '')
 
     # Rubular: http://rubular.com/r/XZVqMPJhea
     EscapedHTMLTagRule = Rule(r'&lt;\/?[^gt;]*gt;', '')
