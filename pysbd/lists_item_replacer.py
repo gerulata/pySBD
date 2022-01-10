@@ -18,20 +18,20 @@ class ListItemReplacer(object):
     ALPHABETICAL_LIST_WITH_PARENS = r'(?<=\()[a-z]+(?=\))|(?<=^)[a-z]+(?=\))|(?<=\A)[a-z]+(?=\))|(?<=\s)[a-z]+(?=\))'
 
     # (pattern, replacement)
-    SubstituteListPeriodRule = Rule('♨', '∯')
-    ListMarkerRule = Rule('☝', '')
+    SubstituteListPeriodRule = Rule('󿿾', '∯')
+    ListMarkerRule = Rule('󿿿', '')
 
     # Rubular: http://rubular.com/r/Wv4qLdoPx7
     # https://regex101.com/r/62YBlv/1
-    SpaceBetweenListItemsFirstRule = Rule(r'(?<=\S\S)\s(?=\S\s*\d+♨)', "\r")
+    SpaceBetweenListItemsFirstRule = Rule(r'(?<=\S\S)\s(?=\S\s*\d+󿿾)', "\r")
 
     # Rubular: http://rubular.com/r/AizHXC6HxK
     # https://regex101.com/r/62YBlv/2
-    SpaceBetweenListItemsSecondRule = Rule(r'(?<=\S\S)\s(?=\d{1,2}♨)', "\r")
+    SpaceBetweenListItemsSecondRule = Rule(r'(?<=\S\S)\s(?=\d{1,2}󿿾)', "\r")
 
     # Rubular: http://rubular.com/r/GE5q6yID2j
     # https://regex101.com/r/62YBlv/3
-    SpaceBetweenListItemsThirdRule = Rule(r'(?<=\S\S)\s(?=\d{1,2}☝)', "\r")
+    SpaceBetweenListItemsThirdRule = Rule(r'(?<=\S\S)\s(?=\d{1,2}󿿿)', "\r")
 
     NUMBERED_LIST_REGEX_1 = r'\s\d{1,2}(?=\.\s)|^\d{1,2}(?=\.\s)|\s\d{1,2}(?=\.\))|^\d{1,2}(?=\.\))|(?<=\s\-)\d{1,2}(?=\.\s)|(?<=^\-)\d{1,2}(?=\.\s)|(?<=\s\⁃)\d{1,2}(?=\.\s)|(?<=^\⁃)\d{1,2}(?=\.\s)|(?<=s\-)\d{1,2}(?=\.\))|(?<=^\-)\d{1,2}(?=\.\))|(?<=\s\⁃)\d{1,2}(?=\.\))|(?<=^\⁃)\d{1,2}(?=\.\))'
     # 1. abcd
@@ -74,7 +74,7 @@ class ListItemReplacer(object):
 
     def replace_periods_in_numbered_list(self):
         self.scan_lists(self.NUMBERED_LIST_REGEX_1, self.NUMBERED_LIST_REGEX_2,
-                        '♨', strip=True)
+                        '󿿾', strip=True)
 
     def format_numbered_list_with_periods(self):
         self.replace_periods_in_numbered_list()
@@ -111,6 +111,8 @@ class ListItemReplacer(object):
 
     def scan_lists(self, regex1, regex2, replacement, strip=False):
         list_array = re.findall(regex1, self.text)
+        # Removes special characters like ''before the cast
+        list_array = list(map(str.strip, list_array))
         list_array = list(map(int, list_array))
         for ind, item in enumerate(list_array):
             # to avoid IndexError
@@ -124,8 +126,7 @@ class ListItemReplacer(object):
                     self.substitute_found_list_items(regex2, item, strip, replacement)
 
     def substitute_found_list_items(self, regex, each, strip, replacement):
-
-        def replace_item(match, val=None, strip=False, repl='♨'):
+        def replace_item(match, val=None, strip=False, repl='󿿾'):
             match = match.group()
             if strip:
                 match = str(match).strip()
@@ -139,19 +140,19 @@ class ListItemReplacer(object):
                            strip=strip, repl=replacement), self.text)
 
     def add_line_breaks_for_numbered_list_with_periods(self):
-        if ('♨' in self.text) and (not re.search(
-                '♨.+(\n|\r).+♨', self.text)) and (not re.search(
-                    r'for\s\d{1,2}♨\s[a-z]', self.text)):
+        if ('󿿾' in self.text) and (not re.search(
+                r'󿿾.+([\n\r]).+󿿾', self.text)) and (not re.search(
+                    r'for\s\d{1,2}󿿾\s[a-z]', self.text)):
             self.text = Text(self.text).apply(self.SpaceBetweenListItemsFirstRule,
                                     self.SpaceBetweenListItemsSecondRule)
 
     def replace_parens_in_numbered_list(self):
         self.scan_lists(
-            self.NUMBERED_LIST_PARENS_REGEX, self.NUMBERED_LIST_PARENS_REGEX, '☝')
-        self.scan_lists(self.NUMBERED_LIST_PARENS_REGEX, self.NUMBERED_LIST_PARENS_REGEX, '☝')
+            self.NUMBERED_LIST_PARENS_REGEX, self.NUMBERED_LIST_PARENS_REGEX, '󿿿')
+        self.scan_lists(self.NUMBERED_LIST_PARENS_REGEX, self.NUMBERED_LIST_PARENS_REGEX, '󿿿')
 
     def add_line_breaks_for_numbered_list_with_parens(self):
-        if '☝' in self.text and not re.search("☝.+\n.+☝|☝.+\r.+☝", self.text):
+        if '󿿿' in self.text and not re.search(r"󿿿.+\n.+󿿿|󿿿.+\r.+󿿿", self.text):
             self.text = Text(self.text).apply(
                 self.SpaceBetweenListItemsThirdRule)
 
